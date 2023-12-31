@@ -1,0 +1,24 @@
+sequenceDiagram
+
+    participant Browser
+    participant Server
+
+    browser->>server: GET request is made by browser to server GET https://studies.cs.helsinki.fi/exampleapp/spa
+    activate server
+    server->>browser: 200 response with  HTML-file
+    Deactivate server
+
+    browser->>server: GET request is made for css file GET https://studies.cs.helsinki.fi/exampleapp/main.css
+    activate server
+    server->>browser: 200 response with main.css file
+    Deactivate server
+
+    browser->>server: GET request for GET https://studies.cs.helsinki.fi/exampleapp/spa.js
+    activate server
+    server->>browser: 200 response with  js file
+    Deactivate server
+
+    browser->>server: GET request for GET https://studies.cs.helsinki.fi/exampleapp/data.json
+    activate server
+    server->>browser: 200 response with data.json
+    Deactivate server

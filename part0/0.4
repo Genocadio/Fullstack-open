@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant User
+    participant Browser
+    participant Server
+    participant Database
+
+    User->>Browser: Hit Save button with data
+    Browser->>Server: POST request is made to the server by the Browser POST	https://studies.cs.helsinki.fi/exampleapp/new_note
+    activate server
+    Server->>Database: Server save notes data in the Database at /exampleapp/notes
+    Server->>Browser: 302 HTTP Response with POST POST	https://studies.cs.helsinki.fi/exampleapp/new_note
+    Deactivate server
+
+    Browser->>Server: GET request for Page HTML GET	https://studies.cs.helsinki.fi/exampleapp/notes
+    activate server
+    Server->>Browser: 200 for Page HTML and HTML file
+    Deactivate server
+
+    Browser->>Server: GET request for Page CSS GET	https://studies.cs.helsinki.fi/exampleapp/main.css
+    activate server
+    Server->>Browser: 200 for Page CSS and return css file
+    Deactivate server
+
+    Browser->>Server: GET request for Page JavaScript GET https://studies.cs.helsinki.fi/exampleapp/main.js
+    activate server
+    Server->>Browser: 200 for Page JavaScript with javascript file
+    Deactivate server
+
+    Browser->>Server: GET request for JSON GET	https://studies.cs.helsinki.fi/exampleapp/data.json
+    activate server
+    Server->>Browser: 200 for JSON with data.json
+    Deactivate server

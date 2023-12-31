@@ -1,0 +1,12 @@
+sequenceDiagram
+
+    participant Browser
+    participant Server
+    participant User
+
+    
+    User->>Browser: adds note to browser and submit
+    browser->>server: POST request to server POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    activate server
+    server->>browser: response with status code 201
+    Deactivate server
