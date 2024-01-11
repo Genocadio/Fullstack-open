@@ -1,7 +1,7 @@
 import axios from "axios";
 //Module to handle axios server communication
 
-const ph_url = "http://localhost:3001/persons";
+const ph_url = "/api/persons";
 
 //Function got https GET
 const getphoneNumbers = () => {
