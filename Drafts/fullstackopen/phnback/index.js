@@ -1,97 +1,77 @@
 const express = require('express');
 const morgan = require('morgan');
 const app = express();
-const port = process.env.PORT || 3001;
-const cors = require('cors');
-
-let persons = [
-  { 
-    "id": 1,
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": 2,
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": 3,
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": 4,
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-]
-
-const generateId = () => {
-  const maxId = persons.length > 0 ? Math.max(...persons.map(n => n.id)) : 0;
-  return maxId + 1;
-}
+require('dotenv').config();// module to use .env file in my data
+const port = process.env.PORT;
+const Person = require('./models/person'); // import the person model for database
+const cors = require('cors'); // module to allow cross-origin requests
 
 app.use(express.json());
-app.use(morgan('common'));
+app.use(morgan('common')); // use morgan to log the request
 app.use(cors());
 app.use(express.static('dist'));
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons);
+  // get all persons from the database MongoDB
+  Person.find({}).then(result => {
+    res.json(result);
+  });
 });
 
-app.get('/info', (req, res) => {
+app.get('/info', async (req, res) => {
+  const personCount = await Person.countDocuments({});
   const date = new Date();
-  res.send(`<p>Phonebook has info for ${persons.length} people</p> <br /> <p>${date}</p>`);
+  res.send(`<p>Phonebook has info for ${personCount} people</p> <br /> <p>${date}</p>`);
 });
 
-
-app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const person = persons.find(person => person.id === id);
-  if(person) {
-    res.json(person);
-  } else {
-    res.status(404).end();
-  }
-}
-);
-
-app.delete('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id);
-  persons = persons.filter(person => person.id !== id)
-  res.status(204).end();
+app.get('/api/persons/:id', (req, res, next) => {
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch(error => next(error));
 });
 
-app.post('/api/persons', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(result => {
+      if (result) {
+        res.json(result);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch(error => next(error));
+});
+
+app.post('/api/persons', (req, res, next) => {
   const body = req.body;
+
   if (!body.name || !body.number) {
-    return res.status(400).json({
-      error: 'content missing'
-    });
+    return res.status(400).json({ error: 'Name or number is missing' });
   }
 
-  const existingPerson = persons.find(person => person.name === body.name);
-  if (existingPerson) {
-    return res.status(400).json({
-      error: 'name must be unique'
-    });
-  }
-
-  const person  = {
-    id: generateId(),
+  const person = new Person({
     name: body.name,
-    number: body.number
-  };
-  console.log(person);
-  persons = persons.concat(person);
-  res.json(person);
+    number: body.number,
+  });
+
+  person.save()
+    .then(savedPerson => {
+      res.json(savedPerson);
+    })
+    .catch(error => next(error));
 });
 
-
+app.use((error, req, res, next) => {
+  console.error(error);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
-}
-);
+});
