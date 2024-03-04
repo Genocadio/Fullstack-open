@@ -1,34 +1,49 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 //mongo db database
-const Password = process.argv[2];
-const url  = process.env.MONGODB_URI;
+// eslint-disable-next-line no-unused-vars
+const Password = process.argv[2]
+const url  = process.env.MONGODB_URI
 
-console.log('Connecting to', url);
-mongoose.set('strictQuery', false);
+console.log('Connecting to', url)
+mongoose.set('strictQuery', false)
 mongoose.connect(url)
-  .then(result => {
-    console.log('connected to MongoDB');
-  })
-  .catch((error) => {
-    console.log('error connecting to MongoDB:', error.message);
-  });
+    // eslint-disable-next-line no-unused-vars
+    .then(result => {
+        console.log('connected to MongoDB')
+    })
+    .catch((error) => {
+        console.log('error connecting to MongoDB:', error.message)
+    })
 
 const personSchema = new mongoose.Schema({
     name: {
-      type: String,
-      minLength: 3,
-      required: true,
+        type: String,
+        minLength: 3,
+        required: true,
     },
-    number: String,
-    });
+    number: {
+        type: String,
+        minLength: 8,
+        required: true,
+        validate: {
+            validator: function(v) {
+                const hyphindex = v.indexOf('-')
+                if (hyphindex === 2 || hyphindex === 3) {
+                    return true
+                }
+                return false
+            },
+        }
+    },
+})
 
 personSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
-    delete returnedObject._id;
-    delete returnedObject.__v;
-  }
-});
+    transform: (document, returnedObject) => {
+        returnedObject.id = returnedObject._id.toString()
+        delete returnedObject._id
+        delete returnedObject.__v
+    }
+})
 
-const Person = mongoose.model('Person', personSchema);
-module.exports = Person;
+const Person = mongoose.model('Person', personSchema)
+module.exports = Person

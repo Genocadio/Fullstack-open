@@ -123,8 +123,9 @@ const App = () => {
           })
           // eslint-disable-next-line no-unused-vars
           .catch(error => {
-            handleMessgae(`Information of ${existingPerson.name} has already been removed from server`)
-            setPersons(persons.filter(person => person.id !== existingPerson.id))
+            console.log('error', error)
+            handleMessgae(`Failed to update ${existingPerson.name}: ${error.response.data.error}`)
+            // setPersons(persons.filter(person => person.id !== existingPerson.id))
           })
       }
       return
@@ -143,6 +144,10 @@ const App = () => {
         setNewName('')
         setNewNum('')
       })
+      .catch(error => {
+        handleMessgae(error.response.data.error) //handle post errors
+      }
+      )
 
     setNewName('')
   }
