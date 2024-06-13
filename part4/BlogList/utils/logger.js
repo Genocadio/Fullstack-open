@@ -1,8 +1,12 @@
 const info = (...prams) => {
-    console.log(...prams)
+    if (process.env.NODE_ENV !== 'test') {
+        console.log(...prams)
+    }
 }
 const error = (...prams) => {
-    console.error(...prams)
+    if (process.env.NODE_ENV !== 'test') {
+        console.error(...prams)
+    }
 }
 module.exports = {
     info, error

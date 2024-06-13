@@ -1,4 +1,5 @@
 const express = require('express')
+require('express-async-errors') // this automaticaly passes any errors in router to middleware
 const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
