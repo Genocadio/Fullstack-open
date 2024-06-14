@@ -91,6 +91,35 @@ test('likes defaults to 0 if missing from the request', async () => {
   assert.strictEqual(blog.likes, 0)
 
 })
+
+test('responds with 400 Bad Request if title is missing', async () => {
+  const newBlog = {
+    author: 'New Author',
+    url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+    likes: 5,
+    __v: 0
+  }
+  await api
+   .post('/api/blogs')
+   .send(newBlog)
+   .expect(400)
+  }
+)
+
+test('responds with 400 Bad Request if url is missing', async () => {
+  const newBlog = {
+    title: 'New Blog',
+    author: 'New Author',
+    likes: 5,
+    __v: 0
+  }
+  await api
+   .post('/api/blogs')
+   .send(newBlog)
+   .expect(400)
+  }
+)
+
 after(async () => {
     await mongoose.connection.close()
 })
