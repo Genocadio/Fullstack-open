@@ -120,6 +120,63 @@ test('responds with 400 Bad Request if url is missing', async () => {
   }
 )
 
+test('delete blog post', async () => {
+  const newBlog = {
+    title: 'New Blog',
+    author: 'New Author',
+    url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+    likes: 5,
+    __v: 0
+  }
+  const response = await api
+   .post('/api/blogs')
+   .send(newBlog)
+   .expect(201)
+   .expect('Content-Type', /application\/json/)
+   const result = await api.get('/api/blogs')
+   const blog = result.body.find(e => e.title === 'New Blog')
+   await api
+    .delete(`/api/blogs/${blog.id}`)
+    .expect(204)
+    const result2 = await api.get('/api/blogs')
+    assert.strictEqual(result2.body.length, initialBlogs.length)
+
+}
+)
+
+test('update a blog post', async () => {
+  const newBlog = {
+    title: 'New Blog',
+    author: 'New Author',
+    url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+    likes: 5,
+    __v: 0
+  }
+  const response = await api
+   .post('/api/blogs')
+   .send(newBlog)
+   .expect(201)
+   .expect('Content-Type', /application\/json/)
+   const result = await api.get('/api/blogs')
+   const blog = result.body.find(e => e.title === 'New Blog')
+   const updatedBlog = {
+    title: 'Updated Blog',
+    author: 'Updated Author',
+    url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+    likes: 10,
+    __v: 0
+  }
+  await api
+    .put(`/api/blogs/${blog.id}`)
+    .send(updatedBlog)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+    const result2 = await api.get('/api/blogs')
+    const updated = result2.body.find(e => e.title === 'Updated Blog')
+    assert.strictEqual(updated.likes, 10)
+    assert.strictEqual(updated.author, 'Updated Author')
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
