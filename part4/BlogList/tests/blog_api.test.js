@@ -54,6 +54,25 @@ test('Blog post unique identifier is id not _id',  async () => {
   assert.strictEqual(blog._id, undefined)
 })
 
+test('POST request to the /api/blogs creates a new blog post.', async () => {
+  const newBlog = {
+    title: 'New Blog',
+    author: 'New Author',
+    url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+    likes: 5,
+    __v: 0
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+  const result = await api.get('/api/blogs')
+  assert.strictEqual(result.body.length, initialBlogs.length + 1)
+  const contents = result.body.map(e => e.title)
+  assert(contents.includes('New Blog'))
+
+})
 after(async () => {
     await mongoose.connection.close()
 })
