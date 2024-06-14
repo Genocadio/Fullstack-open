@@ -47,6 +47,13 @@ test('There are two Blogs', async () => {
     assert.strictEqual(result.body.length, initialBlogs.length)
 })
 
+test('Blog post unique identifier is id not _id',  async () => {
+  const result = await api.get('/api/blogs')
+  const blog = result.body[0]
+  assert.strictEqual(blog.id, initialBlogs[0]._id)
+  assert.strictEqual(blog._id, undefined)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
