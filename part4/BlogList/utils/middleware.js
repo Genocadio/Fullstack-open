@@ -1,4 +1,4 @@
-const { response } = require('../app')
+
 const logger = require('./logger')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
@@ -28,25 +28,41 @@ const errorHandler = (error, request, response, next) => {
       next(error)
     }
   }
-
   const tokenExtractor = (request, response, next) => {
-    const authorization = request.get('authorization')
-    if (authorization && authorization.startsWith('Bearer')) {
-      console.log(authorization)
-      request.token = authorization.replace('Bearer ', '')
+    const authorization = request.get('authorization');
+    if (authorization && authorization.startsWith('Bearer ')) {
+        request.token = authorization.replace('Bearer ', '');
+    } else {
+        request.token = null; // Ensure request.token is set, even if not present
     }
-    next()
-  }
-const userExtractor = async (request,  response, next ) => {
-  if (request.token) {
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    if (decodedToken.id) {
-      const user = await User.findById(decodedToken.id)
-      request.user = user
+    next();
+};
+
+const userExtractor = async (request, response, next) => {
+    const token = request.token;
+    // console.log(token)
+    if (!token) {
+        return next(); // No token, move to the next middleware
     }
-  }
-  next ()
-}
+
+    try {
+        const decodedToken = jwt.verify(token, process.env.SECRET);
+        if (!decodedToken.id) {
+            throw new Error('Token invalid');
+        }
+        const user = await User.findById(decodedToken.id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        request.user = user; // Attach user object to request
+        // console.log('user fetched from userExtractor: ')
+        next();
+    } catch (error) {
+        // console.log('error in user extractor')
+        return response.status(401).json({ error: 'Unauthorized' });
+    }
+};
+
   module.exports = {
     requestLogger,
     unkownEndpoint,

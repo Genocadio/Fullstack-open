@@ -7,8 +7,13 @@ loginRouter.post('/', async(request,  response) => {
     const { username, password } = request.body
 
     const user = await User.findOne({ username })
-    console.log(user)
-    console.log('User password hash:', user.passwordHash);
+    if(user === null || user === undefined || !user) {
+        return response.status(401).json({
+            error: 'invalid username or passowrd'
+        })
+    }
+    // console.log(user)
+    // console.log('User password hash:', user.passwordHash);
     const passCorrect = user === null 
         ? false
         : await bcrypt.compare(password, user.passwordHash)
@@ -25,8 +30,12 @@ loginRouter.post('/', async(request,  response) => {
         id: user._id
     }
 
-    console.log(process.env.SECRET)
-    const token  = jwt.sign(userForToken, process.env.SECRET)
+    // console.log(process.env.SECRET)
+    const token = jwt.sign(
+        userForToken,
+        process.env.SECRET,
+        { expiresIn: 60*60 }
+    )
 
     response
         .status(200)

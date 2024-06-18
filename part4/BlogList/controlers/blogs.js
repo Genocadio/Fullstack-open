@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken')
 const getTokenFrom = request => {
     const authorization = request.get('authorization')
     if (authorization && authorization.startsWith('Bearer')) {
-        console.log(authorization)
+        // console.log(authorization)
         return authorization.replace('Bearer ', '')
     }
     return null
@@ -22,14 +22,16 @@ blogsRouter.post('/', async (request, response) => {
     const body = request.body
 
     const decodedToken = request.user
-    if(!decodedToken.id) {
-        return response.status(401).json({ error: 'invalid token' })
+    // console.log(decodedToken)
+    if(decodedToken === null || decodedToken === undefined || !decodedToken.id) {
+        return response.status(401).json({ error: 'Unauthorized' })
     }
+    // console.log(decodedToken)
 
     // if (!body.userId) {
     //     return response.status(400).json({ error: 'userId is required' })
     // }
-    console.log(decodedToken.id)
+    // console.log(decodedToken.id)
     const user = await User.findById(decodedToken.id)
     if(!user) {
         return response.status(404).json({ error: 'user not found' })
@@ -37,9 +39,9 @@ blogsRouter.post('/', async (request, response) => {
 
 
     const blog = new Blog({
+        url: body.url,
         title: body.title,
         author: body.author,
-        url: body.url,
         likes: body.likes,
         user: user.id,
     })
@@ -55,11 +57,11 @@ blogsRouter.delete('/:id', async (request, response) => {
         return response.status(401).json({ error: 'invalid token' })
     }
     const blog = await Blog.findById(request.params.id)
-    console.log(blog)
+    // console.log(blog)
     if (!blog) {
         return response.status(404).json({ error: 'blog not found' })
     }
-    console.log(blog.user)
+    // console.log(blog.user)
     if (blog.user === undefined) {
         return response.status(403).json({ error: 'blog not assigned to any user'})
     }
@@ -70,9 +72,23 @@ blogsRouter.delete('/:id', async (request, response) => {
     const deletedBlog = await Blog.findByIdAndDelete(request.params.id)
     response.status(204).end()
 })
-blogsRouter.put('/:id', async (request, response) => {
-    const blog = await Blog.findByIdAndUpdate(request.params.id, request.body, { new: true })
-    response.json(blog)
-})
+blogsRouter.put('/:id', async (request, response, next) => {
+    const body = request.body;
+  
+    const blog = {
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: body.likes
+    };
+  
+    try {
+      const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true });
+      response.json(updatedBlog);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
 
 module.exports = blogsRouter
