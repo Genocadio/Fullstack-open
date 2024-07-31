@@ -22,7 +22,7 @@ blogsRouter.post('/', async (request, response) => {
     const body = request.body
 
     const decodedToken = request.user
-    // console.log(decodedToken)
+    console.log(decodedToken)
     if(decodedToken === null || decodedToken === undefined || !decodedToken.id) {
         return response.status(401).json({ error: 'Unauthorized' })
     }
@@ -49,7 +49,8 @@ blogsRouter.post('/', async (request, response) => {
     const saveBlog = await blog.save()
     user.blogs = user.blogs.concat(saveBlog._id)
     await user.save()
-    response.status(201).json(saveBlog)
+    const populatedBlog = await Blog.findById(saveBlog._id).populate('user', { username: 1, id: 1 });
+    response.status(201).json(populatedBlog);
 })
 blogsRouter.delete('/:id', async (request, response) => {
     const decodedToken = request.user
@@ -74,17 +75,34 @@ blogsRouter.delete('/:id', async (request, response) => {
 })
 blogsRouter.put('/:id', async (request, response, next) => {
     const body = request.body;
+    const decodedToken = request.user
+    // console.log(decodedToken)
+    if(decodedToken === null || decodedToken === undefined || !decodedToken.id) {
+        return response.status(401).json({ error: 'Unauthorized' })
+    }
+    // console.log(decodedToken)
+
+    // if (!body.userId) {
+    //     return response.status(400).json({ error: 'userId is required' })
+    // }
+    // console.log(decodedToken.id)
+    const user = await User.findById(decodedToken.id)
+    if(!user) {
+        return response.status(404).json({ error: 'user not found' })
+    }
   
     const blog = {
       title: body.title,
       author: body.author,
       url: body.url,
-      likes: body.likes
+      likes: body.likes,
+      user: user.id
     };
   
     try {
       const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true });
-      response.json(updatedBlog);
+      const populatedBlog = await Blog.findById(updatedBlog._id).populate('user', { username: 1, id: 1 });
+      response.json(populatedBlog);
     } catch (error) {
       next(error);
     }
