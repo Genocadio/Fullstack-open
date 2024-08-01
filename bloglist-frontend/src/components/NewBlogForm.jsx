@@ -19,7 +19,6 @@ const NewBlogForm = ({ handleNewBlog }) => {
     setTitle('')
     setAuthor('')
     setUrl('')
-    console.log('likes', likes)
   }
 
   return (
@@ -29,39 +28,34 @@ const NewBlogForm = ({ handleNewBlog }) => {
         <div>
           Title:
           <input
-            type='text'
+            type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter title"
             required
           />
         </div>
         <div>
           Author:
           <input
-            type='text'
+            type="text"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
+            placeholder="Enter author"
             required
           />
         </div>
         <div>
           URL:
           <input
-            type='text'
+            type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            placeholder="Enter URL"
             required
           />
         </div>
-        {/* <div>
-            Likes:
-            <input
-              type='number'
-              value={likes}
-              onChange={(e) => setLikes(e.target.value)}
-            />
-          </div> */}
-        <button type='submit'>Create Blog</button>
+        <button type="submit" className="create-button">Create Blog</button>
       </form>
     </div>
   )
